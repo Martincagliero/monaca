@@ -83,7 +83,7 @@ export default function InstagramSection() {
             >
               <Image
                 src={src}
-                alt={`Post ${i + 1}`}
+                alt={`Publicación ${i + 1}`}
                 fill
                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 16vw"
                 className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -103,7 +103,7 @@ export default function InstagramSection() {
             href="/feed"
             className="inline-flex px-10 py-3.5 border border-[#1a1814] text-[#1a1814] text-[10px] tracking-[0.32em] uppercase hover:bg-[#1a1814] hover:text-white transition-all duration-300"
           >
-            Ver todo el feed
+            Ver toda la galería
           </Link>
         </div>
 

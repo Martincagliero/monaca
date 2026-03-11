@@ -2,20 +2,20 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 const LOOKS = [
-  { id: 1, aspect: 'aspect-[3/4]', label: 'Look 01', src: '/monaca/ropa/ropa-07.jpg' },
-  { id: 2, aspect: 'aspect-[2/3]', label: 'Look 02', src: '/monaca/ropa/ropa-08.jpg' },
-  { id: 3, aspect: 'aspect-[3/5]', label: 'Look 03', src: '/monaca/ropa/ropa-09.jpg' },
-  { id: 4, aspect: 'aspect-[4/5]', label: 'Look 04', src: '/monaca/ropa/ropa-10.jpg' },
-  { id: 5, aspect: 'aspect-[2/3]', label: 'Look 05', src: '/monaca/ropa/ropa-11.jpg' },
-  { id: 6, aspect: 'aspect-[4/5]', label: 'Look 06', src: '/monaca/ropa/ropa-12.jpg' },
-  { id: 7, aspect: 'aspect-[3/4]', label: 'Look 07', src: '/monaca/ropa/ropa-13.jpg' },
-  { id: 8, aspect: 'aspect-[2/3]', label: 'Look 08', src: '/monaca/ropa/ropa-14.jpg' },
-  { id: 9, aspect: 'aspect-[3/4]', label: 'Look 09', src: '/monaca/ropa/ropa-15.jpg' },
-  { id: 10, aspect: 'aspect-[3/5]', label: 'Look 10', src: '/monaca/ropa/ropa-16.jpg' },
-  { id: 11, aspect: 'aspect-[2/3]', label: 'Look 11', src: '/monaca/ropa/ropa-17.jpg' },
-  { id: 12, aspect: 'aspect-[4/5]', label: 'Look 12', src: '/monaca/ropa/ropa-18.jpg' },
-  { id: 13, aspect: 'aspect-[3/4]', label: 'Look 13', src: '/monaca/ropa/ropa-19.jpg' },
-  { id: 14, aspect: 'aspect-[2/3]', label: 'Look 14', src: '/monaca/ropa/ropa-20.jpg' },
+  { id: 1, aspect: 'aspect-[3/4]', label: 'Estilo 01', src: '/monaca/ropa/ropa-07.jpg' },
+  { id: 2, aspect: 'aspect-[2/3]', label: 'Estilo 02', src: '/monaca/ropa/ropa-08.jpg' },
+  { id: 3, aspect: 'aspect-[3/5]', label: 'Estilo 03', src: '/monaca/ropa/ropa-09.jpg' },
+  { id: 4, aspect: 'aspect-[4/5]', label: 'Estilo 04', src: '/monaca/ropa/ropa-10.jpg' },
+  { id: 5, aspect: 'aspect-[2/3]', label: 'Estilo 05', src: '/monaca/ropa/ropa-11.jpg' },
+  { id: 6, aspect: 'aspect-[4/5]', label: 'Estilo 06', src: '/monaca/ropa/ropa-12.jpg' },
+  { id: 7, aspect: 'aspect-[3/4]', label: 'Estilo 07', src: '/monaca/ropa/ropa-13.jpg' },
+  { id: 8, aspect: 'aspect-[2/3]', label: 'Estilo 08', src: '/monaca/ropa/ropa-14.jpg' },
+  { id: 9, aspect: 'aspect-[3/4]', label: 'Estilo 09', src: '/monaca/ropa/ropa-15.jpg' },
+  { id: 10, aspect: 'aspect-[3/5]', label: 'Estilo 10', src: '/monaca/ropa/ropa-16.jpg' },
+  { id: 11, aspect: 'aspect-[2/3]', label: 'Estilo 11', src: '/monaca/ropa/ropa-17.jpg' },
+  { id: 12, aspect: 'aspect-[4/5]', label: 'Estilo 12', src: '/monaca/ropa/ropa-18.jpg' },
+  { id: 13, aspect: 'aspect-[3/4]', label: 'Estilo 13', src: '/monaca/ropa/ropa-19.jpg' },
+  { id: 14, aspect: 'aspect-[2/3]', label: 'Estilo 14', src: '/monaca/ropa/ropa-20.jpg' },
 ];
 
 export default function LooksPage() {
@@ -29,7 +29,7 @@ export default function LooksPage() {
               className="text-[clamp(2.2rem,6vw,5rem)] font-light tracking-[0.04em] text-[#1a1814]"
               style={{ fontFamily: 'var(--font-cormorant)' }}
             >
-              Todos los Looks
+              Todos los estilos
             </h1>
           </div>
           <Link

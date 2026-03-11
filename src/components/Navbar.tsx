@@ -95,7 +95,7 @@ export default function Navbar() {
           <button
             className="md:hidden p-1"
             onClick={() => setMenuOpen((v) => !v)}
-            aria-label="Toggle menu"
+            aria-label="Alternar menú"
           >
             {menuOpen ? (
               <X size={20} className="text-[#1a1814]" />

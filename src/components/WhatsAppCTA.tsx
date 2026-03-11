@@ -50,7 +50,7 @@ export default function WhatsAppCTA() {
             {/* Dismiss */}
             <button
               onClick={() => setVisible(false)}
-              aria-label="Close"
+              aria-label="Cerrar"
               className="w-6 h-6 rounded-full bg-black/25 flex items-center justify-center text-white/60 hover:bg-black/45 transition-colors duration-200"
             >
               <X size={10} />
@@ -61,7 +61,7 @@ export default function WhatsAppCTA() {
               href={WA_LINK}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Chat on WhatsApp"
+              aria-label="Chatear por WhatsApp"
               onMouseEnter={() => setTooltip(true)}
               onMouseLeave={() => setTooltip(false)}
               className="relative w-14 h-14 rounded-full bg-[#25D366] flex items-center justify-center shadow-lg hover:bg-[#1ebe5c] transition-colors duration-300"

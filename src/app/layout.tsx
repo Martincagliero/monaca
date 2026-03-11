@@ -37,7 +37,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${inter.variable}`}>
+    <html lang="es" className={`${cormorant.variable} ${inter.variable}`}>
       <body>
         <CustomCursor />
         <SmoothScroll>{children}</SmoothScroll>

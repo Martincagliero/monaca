@@ -25,8 +25,8 @@ type HeroLook = {
 const LOOKBOOK: HeroLook[] = [
   {
     id: '01',
-    name: 'Urban Coat Layer',
-    note: 'City structure',
+    name: 'Abrigo Urbano en Capas',
+    note: 'Estructura urbana',
     src: '/monaca/hero/look-01.jpg',
     styles: ['urbano'],
     climate: ['cold', 'mild'],
@@ -35,8 +35,8 @@ const LOOKBOOK: HeroLook[] = [
   },
   {
     id: '02',
-    name: 'Atelier Neutral',
-    note: 'Soft elegance',
+    name: 'Atelier Neutro',
+    note: 'Elegancia suave',
     src: '/monaca/hero/look-02.jpg',
     styles: ['elegante'],
     climate: ['mild', 'warm'],
@@ -45,8 +45,8 @@ const LOOKBOOK: HeroLook[] = [
   },
   {
     id: '03',
-    name: 'Runway Contrast',
-    note: 'Night texture',
+    name: 'Contraste de Pasarela',
+    note: 'Textura nocturna',
     src: '/monaca/hero/look-03.jpg',
     styles: ['urbano', 'elegante'],
     climate: ['cold', 'mild'],
@@ -54,8 +54,8 @@ const LOOKBOOK: HeroLook[] = [
   },
   {
     id: '04',
-    name: 'Core Tailoring',
-    note: 'Premium lines',
+    name: 'Sastrería Esencial',
+    note: 'Líneas premium',
     src: '/monaca/hero/look-04.jpg',
     styles: ['elegante'],
     climate: ['mild', 'warm'],
@@ -64,8 +64,8 @@ const LOOKBOOK: HeroLook[] = [
   },
   {
     id: '05',
-    name: 'Street Capsule',
-    note: 'Urban movement',
+    name: 'Cápsula Urbana',
+    note: 'Movimiento urbano',
     src: '/monaca/hero/look-05.jpg',
     styles: ['urbano'],
     climate: ['warm', 'mild'],
@@ -74,8 +74,8 @@ const LOOKBOOK: HeroLook[] = [
   },
   {
     id: '06',
-    name: 'Editorial Flow',
-    note: 'Color mood',
+    name: 'Flujo Editorial',
+    note: 'Clima de color',
     src: '/monaca/hero/look-06.jpg',
     styles: ['elegante', 'urbano'],
     climate: ['warm', 'mild'],
@@ -140,45 +140,45 @@ function buildHeroCopy(params: {
 
   if (city.includes('buenos aires')) {
     return {
-      kicker: 'Buenos Aires edit',
-      titleA: 'Atelier Elegance',
-      titleB: 'for City Nights',
+      kicker: 'Edición Buenos Aires',
+      titleA: 'Elegancia de atelier',
+      titleB: 'para noches de ciudad',
       subtitle: 'Looks refinados para agenda premium: textura, corte y elegancia en cada salida.',
     };
   }
 
   if (city.includes('rosario')) {
     return {
-      kicker: 'Rosario edit',
-      titleA: 'Light Color',
-      titleB: 'for Warm Days',
+      kicker: 'Edición Rosario',
+      titleA: 'Color liviano',
+      titleB: 'para días cálidos',
       subtitle: 'Prendas livianas, color y fluidez para una experiencia moderna y vibrante.',
     };
   }
 
   if (params.tempBucket === 'cold') {
     return {
-      kicker: 'Weather adaptive edit',
-      titleA: 'Warm Urban',
-      titleB: 'with Editorial Edge',
-      subtitle: 'Hero ajustado por clima frio: capas funcionales y look premium para exterior.',
+      kicker: 'Edición adaptada al clima',
+      titleA: 'Urbano cálido',
+      titleB: 'con impronta editorial',
+      subtitle: 'Portada ajustada por clima frío: capas funcionales y estilo premium para exterior.',
     };
   }
 
   if (params.tempBucket === 'warm') {
     return {
-      kicker: 'Weather adaptive edit',
-      titleA: 'Light Premium',
-      titleB: 'with Color Focus',
-      subtitle: 'Hero ajustado por clima calido: prendas ligeras y palette mas viva para el dia.',
+      kicker: 'Edición adaptada al clima',
+      titleA: 'Premium liviano',
+      titleB: 'con foco en color',
+      subtitle: 'Portada ajustada por clima cálido: prendas ligeras y paleta más viva para el día.',
     };
   }
 
   return {
-    kicker: 'Personalized signature',
-    titleA: 'Monaca Signature',
-    titleB: 'for Your Profile',
-    subtitle: 'Experiencia VIP: el hero adapta narrativa y composicion segun perfil y contexto.',
+    kicker: 'Firma personalizada',
+    titleA: 'Firma Monaca',
+    titleB: 'para tu perfil',
+    subtitle: 'Experiencia VIP: la portada adapta narrativa y composición según perfil y contexto.',
   };
 }
 
@@ -381,7 +381,7 @@ function LookCard({ look }: { look: HeroLook }) {
           <div className="absolute inset-0 bg-[linear-gradient(140deg,rgba(255,255,255,0.16),transparent_40%,rgba(26,24,20,0.24))]" />
           {mediaError && (
             <div className="absolute bottom-3 left-3 right-3 rounded-full border border-white/35 bg-black/20 px-3 py-2 text-[8px] uppercase tracking-[0.35em] text-white/88 backdrop-blur-md">
-              Add {look.src.split('/').pop()}
+              Imagen {look.src.split('/').pop()}
             </div>
           )}
         </div>
@@ -409,6 +409,7 @@ export default function Hero() {
   const [tempBucket, setTempBucket] = useState<TempBucket>('mild');
   const [locating, setLocating] = useState(false);
   const [showLocationPrompt, setShowLocationPrompt] = useState(true);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
   const sectionRef = useRef<HTMLElement>(null);
   const tintRef = useRef<HTMLDivElement>(null);
@@ -443,10 +444,11 @@ export default function Hero() {
 
   const requestUserLocation = useCallback(() => {
     if (!navigator.geolocation) {
-      setShowLocationPrompt(false);
+      setLocationError('Tu navegador no permite geolocalización.');
       return;
     }
 
+    setLocationError(null);
     setLocating(true);
 
     navigator.geolocation.getCurrentPosition(
@@ -475,19 +477,28 @@ export default function Hero() {
             }
           }
         } catch {
-          // Keep graceful fallbacks if external services fail.
+          setLocationError('No pudimos actualizar ciudad y clima en este momento.');
         } finally {
           setLocating(false);
           setShowLocationPrompt(false);
         }
       },
-      () => {
+      (error) => {
+        if (error.code === error.PERMISSION_DENIED) {
+          setLocationError('No diste permiso de ubicación. Podés intentarlo de nuevo.');
+        } else {
+          setLocationError('No pudimos obtener tu ubicación. Intentá nuevamente.');
+        }
         setLocating(false);
-        setShowLocationPrompt(false);
+        setShowLocationPrompt(true);
       },
       { enableHighAccuracy: false, timeout: 7000, maximumAge: 0 },
     );
   }, []);
+
+  useEffect(() => {
+    requestUserLocation();
+  }, [requestUserLocation]);
 
   const heroCopy = useMemo(
     () => buildHeroCopy({ city, tempBucket }),
@@ -671,7 +682,7 @@ export default function Hero() {
         <div className="absolute inset-0 z-10">
           <Image
             src="/monaca/hero/look-02.jpg"
-            alt="Monaca hero"
+            alt="Portada de Monaca"
             fill
             sizes="100vw"
             className="object-cover"
@@ -704,14 +715,19 @@ export default function Hero() {
           {showLocationPrompt && (
             <div className={`mb-4 max-w-[31rem] rounded-2xl border px-4 py-3 ${isDesktop ? 'border-[#cfbfa7] bg-white/70 text-[#51463b]' : 'border-white/50 bg-black/28 text-white/92'}`}>
               <p className="text-[9px] uppercase tracking-[0.35em]">
-                Activa ubicacion para personalizar el hero
+                Activá ubicación para personalizar la portada
               </p>
+              {locationError && (
+                <p className="mt-2 text-xs tracking-[0.03em] text-[#7a4a3b]">
+                  {locationError}
+                </p>
+              )}
               <div className="mt-3 flex flex-wrap gap-2">
                 <button
                   onClick={requestUserLocation}
                   className={`rounded-full border px-4 py-2 text-[8px] uppercase tracking-[0.3em] transition-all ${isDesktop ? 'border-[#1a1713] text-[#1a1713] hover:bg-[#1a1713] hover:text-white' : 'border-white/80 text-white hover:bg-white hover:text-[#1a1713]'}`}
                 >
-                  Permitir ubicacion
+                  Permitir ubicación
                 </button>
                 <button
                   onClick={() => setShowLocationPrompt(false)}
@@ -740,7 +756,7 @@ export default function Hero() {
               {editionId}
             </span>
             <span className={`rounded-full border px-3 py-1 text-[8px] uppercase tracking-[0.3em] ${isDesktop ? 'border-[#cbbba5] bg-white/55 text-[#6c6053]' : 'border-white/50 bg-black/20 text-white/85'}`}>
-              {HERO_IMAGE_POOL.length} fotos live
+              {HERO_IMAGE_POOL.length} fotos en vivo
             </span>
           </div>
 
@@ -769,7 +785,7 @@ export default function Hero() {
               href="#collections"
               className={`inline-flex items-center justify-center border px-8 py-3 text-[10px] uppercase tracking-[0.34em] transition-all duration-300 ${isDesktop ? 'border-[#1a1713] text-[#1a1713] hover:bg-[#1a1713] hover:text-white' : 'border-white/85 text-white hover:bg-white hover:text-[#1a1713]'}`}
             >
-              Ver coleccion
+              Ver colección
             </a>
             <a
               href="#contact"
@@ -781,22 +797,30 @@ export default function Hero() {
               onClick={() => setRefreshSeed(Date.now())}
               className={`inline-flex items-center justify-center rounded-full border px-5 py-3 text-[9px] uppercase tracking-[0.28em] transition-all duration-300 ${isDesktop ? 'border-[#c7b79f] bg-white/70 text-[#5f5346] hover:bg-[#f3eadf]' : 'border-white/55 bg-black/20 text-white/90 hover:bg-white/15'}`}
             >
-              Nuevo mood
+              Nuevo estilo
+            </button>
+            <button
+              onClick={requestUserLocation}
+              className={`inline-flex items-center justify-center rounded-full border px-5 py-3 text-[9px] uppercase tracking-[0.28em] transition-all duration-300 ${isDesktop ? 'border-[#c7b79f] bg-white/70 text-[#5f5346] hover:bg-[#f3eadf]' : 'border-white/55 bg-black/20 text-white/90 hover:bg-white/15'}`}
+            >
+              Actualizar ubicación
             </button>
           </div>
 
           <div ref={statsRef} className="mt-8 grid w-full max-w-[31rem] grid-cols-1 gap-3 sm:grid-cols-3">
             <div className={`rounded-2xl border px-4 py-3 ${isDesktop ? 'border-[#d9ccb9] bg-white/55' : 'border-white/35 bg-black/20'}`}>
-              <p className={`text-[8px] uppercase tracking-[0.34em] ${isDesktop ? 'text-[#867a6e]' : 'text-white/75'}`}>Ubicacion</p>
+              <p className={`text-[8px] uppercase tracking-[0.34em] ${isDesktop ? 'text-[#867a6e]' : 'text-white/75'}`}>Ubicación</p>
               <p className={`mt-2 text-sm ${isDesktop ? 'text-[#1a1713]' : 'text-white'}`}>{city}</p>
             </div>
             <div className={`rounded-2xl border px-4 py-3 ${isDesktop ? 'border-[#d9ccb9] bg-white/55' : 'border-white/35 bg-black/20'}`}>
-              <p className={`text-[8px] uppercase tracking-[0.34em] ${isDesktop ? 'text-[#867a6e]' : 'text-white/75'}`}>Edicion</p>
+              <p className={`text-[8px] uppercase tracking-[0.34em] ${isDesktop ? 'text-[#867a6e]' : 'text-white/75'}`}>Edición</p>
               <p className={`mt-2 text-sm ${isDesktop ? 'text-[#1a1713]' : 'text-white'}`}>{editionId}</p>
             </div>
             <div className={`rounded-2xl border px-4 py-3 ${isDesktop ? 'border-[#d9ccb9] bg-white/55' : 'border-white/35 bg-black/20'}`}>
               <p className={`text-[8px] uppercase tracking-[0.34em] ${isDesktop ? 'text-[#867a6e]' : 'text-white/75'}`}>Clima</p>
-              <p className={`mt-2 text-sm capitalize ${isDesktop ? 'text-[#1a1713]' : 'text-white'}`}>{tempBucket}</p>
+              <p className={`mt-2 text-sm capitalize ${isDesktop ? 'text-[#1a1713]' : 'text-white'}`}>
+                {tempBucket === 'cold' ? 'frío' : tempBucket === 'warm' ? 'cálido' : 'templado'}
+              </p>
             </div>
           </div>
         </div>
@@ -806,7 +830,7 @@ export default function Hero() {
         ref={scrollHintRef}
         className="absolute bottom-7 left-1/2 z-30 flex -translate-x-1/2 flex-col items-center gap-2 text-[#8c8278]/75"
       >
-        <span className="text-[8px] uppercase tracking-[0.5em]">Scroll</span>
+        <span className="text-[8px] uppercase tracking-[0.5em]">Deslizar</span>
         <div className="h-9 w-px bg-gradient-to-b from-[#8c8278]/50 to-transparent" />
         <ChevronDown size={11} className="animate-bounce" />
       </div>

@@ -29,7 +29,7 @@ export default function FeedPage() {
               className="text-[clamp(2.2rem,6vw,5rem)] font-light tracking-[0.04em] text-[#1a1814]"
               style={{ fontFamily: 'var(--font-cormorant)' }}
             >
-              Feed Completo
+              Galería completa
             </h1>
           </div>
           <Link
@@ -51,7 +51,7 @@ export default function FeedPage() {
             >
               <Image
                 src={src}
-                alt={`Post ${i + 1}`}
+                alt={`Publicación ${i + 1}`}
                 fill
                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                 className="object-cover transition-transform duration-500 group-hover:scale-110"

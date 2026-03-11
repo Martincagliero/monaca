@@ -11,14 +11,14 @@ gsap.registerPlugin(ScrollTrigger);
 
 const HERO_ACCESSORY = '/monaca/complementos/complemento-01.jpg';
 
-const CAT_CYCLE = ['Carteras', 'Bolsos', 'Mini Bags', 'Cinturones', 'Accesorios'] as const;
+const CAT_CYCLE = ['Carteras', 'Bolsos', 'Mini bolsos', 'Cinturones', 'Accesorios'] as const;
 
 const ACC_ITEMS = Array.from({ length: 20 }, (_, i) => {
   const id = i + 1;
   const num = String(id).padStart(2, '0');
   return {
     id,
-    name: `Sunchales Edit ${num}`,
+    name: `Edición Sunchales ${num}`,
     category: CAT_CYCLE[i % CAT_CYCLE.length],
     src: `/monaca/complementos/complemento-${num}.jpg`,
   };
@@ -87,12 +87,12 @@ export default function Complementos() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/28 via-transparent to-transparent" />
             <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between">
               <div>
-                <p className="text-[9px] tracking-[0.35em] uppercase text-white/75">Drop 01</p>
+                <p className="text-[9px] tracking-[0.35em] uppercase text-white/75">Lanzamiento 01</p>
                 <p
                   className="text-[clamp(1.6rem,3vw,2.3rem)] text-white font-light"
                   style={{ fontFamily: 'var(--font-cormorant)' }}
                 >
-                  Atelier Accessories
+                  Accesorios Atelier
                 </p>
               </div>
             </div>
