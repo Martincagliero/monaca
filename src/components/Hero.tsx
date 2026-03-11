@@ -227,9 +227,8 @@ export default function Hero() {
   }, [city, tempBucket, refreshSeed]);
 
   const activePool = useMemo(() => {
-    if (tempBucket === 'cold') return COLD_IMAGES;
-    if (tempBucket === 'warm') return WARM_IMAGES;
-    return MILD_IMAGES;
+    if (tempBucket === 'warm') return CALOR_IMAGES;
+    return ROPA_IMAGES;
   }, [tempBucket]);
 
   const displayLooks = useMemo(() => {
