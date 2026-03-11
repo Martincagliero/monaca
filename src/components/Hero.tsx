@@ -83,7 +83,9 @@ const LOOKBOOK: HeroLook[] = [
 const HERO_IMAGES = Array.from({ length: 6 }, (_, i) => `/monaca/hero/look-${String(i + 1).padStart(2, '0')}.jpg`);
 const ROPA_IMAGES = Array.from({ length: 28 }, (_, i) => `/monaca/ropa/ropa-${String(i + 1).padStart(2, '0')}.jpg`);
 const CALOR_IMAGES = Array.from({ length: 4 }, (_, i) => `/monaca/hero/calor-${i + 1}.jpg`);
-const BASE_IMAGE_POOL = [...HERO_IMAGES, ...ROPA_IMAGES];
+const COLD_IMAGES = [...HERO_IMAGES, ...ROPA_IMAGES.slice(0, 10)];
+const MILD_IMAGES = [...HERO_IMAGES, ...ROPA_IMAGES.slice(10, 20)];
+const WARM_IMAGES = [...CALOR_IMAGES, ...ROPA_IMAGES.slice(20, 28)];
 
 function classifyTemp(value: number | null): TempBucket {
   if (value === null) return 'mild';
@@ -177,7 +179,7 @@ export default function Hero() {
         try {
           const [geoRes, weatherRes] = await Promise.all([
             fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`),
-            fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m`),
+            fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m&current_weather=true`),
           ]);
 
           if (geoRes.ok) {
@@ -188,7 +190,7 @@ export default function Hero() {
 
           if (weatherRes.ok) {
             const weather = await weatherRes.json();
-            const currentTemp = weather?.current?.temperature_2m;
+            const currentTemp = weather?.current?.temperature_2m ?? weather?.current_weather?.temperature;
             if (typeof currentTemp === 'number') {
               setTemperature(currentTemp);
               setTempBucket(classifyTemp(currentTemp));
@@ -225,8 +227,9 @@ export default function Hero() {
   }, [city, tempBucket, refreshSeed]);
 
   const activePool = useMemo(() => {
-    if (tempBucket === 'warm') return CALOR_IMAGES;
-    return BASE_IMAGE_POOL;
+    if (tempBucket === 'cold') return COLD_IMAGES;
+    if (tempBucket === 'warm') return WARM_IMAGES;
+    return MILD_IMAGES;
   }, [tempBucket]);
 
   const displayLooks = useMemo(() => {
