@@ -413,8 +413,6 @@ export default function Hero() {
   const [temperature, setTemperature] = useState<number | null>(null);
   const [tempBucket, setTempBucket] = useState<TempBucket>('mild');
   const [locating, setLocating] = useState(false);
-  const [showLocationPrompt, setShowLocationPrompt] = useState(true);
-  const [locationError, setLocationError] = useState<string | null>(null);
 
   const sectionRef = useRef<HTMLElement>(null);
   const tintRef = useRef<HTMLDivElement>(null);
@@ -451,12 +449,9 @@ export default function Hero() {
     if (locating) return;
 
     if (!navigator.geolocation) {
-      setLocationError('Tu navegador no permite geolocalización.');
-      setShowLocationPrompt(true);
       return;
     }
 
-    setLocationError(null);
     setLocating(true);
 
     navigator.geolocation.getCurrentPosition(
@@ -488,24 +483,21 @@ export default function Hero() {
           // Regenerates edition to refresh visible recommendations after location updates.
           setRefreshSeed(Date.now());
         } catch {
-          setLocationError('No pudimos actualizar ciudad y clima en este momento.');
+          // Keep graceful fallback values if any external service fails.
         } finally {
           setLocating(false);
-          setShowLocationPrompt(false);
         }
       },
-      (error) => {
-        if (error.code === error.PERMISSION_DENIED) {
-          setLocationError('No diste permiso de ubicación. Podés intentarlo de nuevo.');
-        } else {
-          setLocationError('No pudimos obtener tu ubicación. Intentá nuevamente.');
-        }
+      () => {
         setLocating(false);
-        setShowLocationPrompt(true);
       },
       { enableHighAccuracy: false, timeout: 7000, maximumAge: 0 },
     );
   }, [locating]);
+
+  useEffect(() => {
+    requestUserLocation();
+  }, [requestUserLocation]);
 
   const heroCopy = useMemo(
     () => buildHeroCopy({ city, tempBucket }),
@@ -726,37 +718,6 @@ export default function Hero() {
 
       <div ref={contentRef} className={`pointer-events-auto relative z-30 flex h-full items-center px-6 md:px-10 lg:px-16 ${isDesktop ? '' : 'justify-center text-center'}`}>
         <div className={`w-full ${isDesktop ? 'max-w-[42rem] 2xl:max-w-[45rem]' : 'max-w-[36rem] text-white'}`}>
-          {showLocationPrompt && (
-            <div className={`pointer-events-auto mb-4 max-w-[31rem] rounded-2xl border px-4 py-3 ${isDesktop ? 'border-[#cfbfa7] bg-white/70 text-[#51463b]' : 'border-white/50 bg-black/28 text-white/92'}`}>
-              <p className="text-[9px] uppercase tracking-[0.35em]">
-                Activá ubicación para personalizar esta portada
-              </p>
-              {locationError && (
-                <p className="mt-2 text-xs tracking-[0.03em] text-[#7a4a3b]">
-                  {locationError}
-                </p>
-              )}
-              <div className="mt-3 flex flex-wrap gap-2">
-                <button
-                  onClick={requestUserLocation}
-                  disabled={locating}
-                  className={`rounded-full border px-4 py-2 text-[8px] uppercase tracking-[0.3em] transition-all ${isDesktop ? 'border-[#1a1713] text-[#1a1713] hover:bg-[#1a1713] hover:text-white' : 'border-white/80 text-white hover:bg-white hover:text-[#1a1713]'}`}
-                >
-                  Usar mi ubicación
-                </button>
-                <button
-                  onClick={() => {
-                    setLocationError(null);
-                    setShowLocationPrompt(false);
-                  }}
-                  className={`rounded-full border px-4 py-2 text-[8px] uppercase tracking-[0.3em] transition-all ${isDesktop ? 'border-[#c8b79e] text-[#6b5f52] hover:bg-[#f1e7d9]' : 'border-white/55 text-white/88 hover:bg-white/15'}`}
-                >
-                  Continuar sin ubicación
-                </button>
-              </div>
-            </div>
-          )}
-
           <div className="mb-5 flex flex-wrap items-center gap-3">
             <p className={`text-[9px] uppercase tracking-[0.46em] sm:text-[10px] sm:tracking-[0.58em] ${isDesktop ? 'text-[#7e7266]' : 'text-white/75'}`}>
               {heroCopy.kicker}
