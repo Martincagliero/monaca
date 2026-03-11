@@ -99,6 +99,11 @@ const COMPLEMENTO_IMAGES = Array.from({ length: 20 }, (_, i) => {
   return `/monaca/complementos/complemento-${num}.jpg`;
 });
 
+const CALOR_IMAGES = Array.from({ length: 4 }, (_, i) => {
+  const num = i + 1;
+  return `/monaca/hero/calor-${num}.jpg`;
+});
+
 const HERO_IMAGE_POOL = [...HERO_IMAGES, ...ROPA_IMAGES, ...COMPLEMENTO_IMAGES];
 
 const CARD_POSITIONS = [
@@ -502,10 +507,6 @@ export default function Hero() {
     );
   }, [locating]);
 
-  useEffect(() => {
-    requestUserLocation();
-  }, [requestUserLocation]);
-
   const heroCopy = useMemo(
     () => buildHeroCopy({ city, tempBucket }),
     [city, tempBucket],
@@ -540,20 +541,30 @@ export default function Hero() {
     return 'templado';
   }, [tempBucket]);
 
+  const selectedImagePool = useMemo(() => {
+    if (tempBucket === 'warm') return CALOR_IMAGES;
+    return HERO_IMAGE_POOL;
+  }, [tempBucket]);
+
   const activeAccent = personalizedLooks.find((item) => item.id === activeLook)?.palette ?? null;
 
   const rotatingLooks = useMemo(() => {
-    const poolSize = HERO_IMAGE_POOL.length;
+    const poolSize = selectedImagePool.length;
     const base = Math.abs(refreshSeed + rotationTick * 13);
 
     return personalizedLooks.map((look, index) => {
       const imageIndex = (base + index * 17) % poolSize;
       return {
         ...look,
-        src: HERO_IMAGE_POOL[imageIndex],
+        src: selectedImagePool[imageIndex],
       };
     });
-  }, [personalizedLooks, refreshSeed, rotationTick]);
+  }, [personalizedLooks, refreshSeed, rotationTick, selectedImagePool]);
+
+  const mobileHeroImage = useMemo(() => {
+    if (tempBucket === 'warm') return CALOR_IMAGES[0];
+    return '/monaca/hero/look-02.jpg';
+  }, [tempBucket]);
 
   const activeAccentFromVisible = rotatingLooks.find((item) => item.id === activeLook)?.palette ?? null;
 
@@ -693,7 +704,7 @@ export default function Hero() {
       {!isDesktop && (
         <div className="absolute inset-0 z-10">
           <Image
-            src="/monaca/hero/look-02.jpg"
+            src={mobileHeroImage}
             alt="Portada de Monaca"
             fill
             sizes="100vw"
@@ -727,7 +738,7 @@ export default function Hero() {
           {showLocationPrompt && (
             <div className={`mb-4 max-w-[31rem] rounded-2xl border px-4 py-3 ${isDesktop ? 'border-[#cfbfa7] bg-white/70 text-[#51463b]' : 'border-white/50 bg-black/28 text-white/92'}`}>
               <p className="text-[9px] uppercase tracking-[0.35em]">
-                Activá ubicación para personalizar la portada
+                Activá ubicación para personalizar esta portada
               </p>
               {locationError && (
                 <p className="mt-2 text-xs tracking-[0.03em] text-[#7a4a3b]">
@@ -740,10 +751,13 @@ export default function Hero() {
                   disabled={locating}
                   className={`rounded-full border px-4 py-2 text-[8px] uppercase tracking-[0.3em] transition-all ${isDesktop ? 'border-[#1a1713] text-[#1a1713] hover:bg-[#1a1713] hover:text-white' : 'border-white/80 text-white hover:bg-white hover:text-[#1a1713]'}`}
                 >
-                  Permitir ubicación
+                  Usar mi ubicación
                 </button>
                 <button
-                  onClick={() => setShowLocationPrompt(false)}
+                  onClick={() => {
+                    setLocationError(null);
+                    setShowLocationPrompt(false);
+                  }}
                   className={`rounded-full border px-4 py-2 text-[8px] uppercase tracking-[0.3em] transition-all ${isDesktop ? 'border-[#c8b79e] text-[#6b5f52] hover:bg-[#f1e7d9]' : 'border-white/55 text-white/88 hover:bg-white/15'}`}
                 >
                   Continuar sin ubicación
@@ -769,7 +783,7 @@ export default function Hero() {
               {editionId}
             </span>
             <span className={`rounded-full border px-3 py-1 text-[8px] uppercase tracking-[0.3em] ${isDesktop ? 'border-[#cbbba5] bg-white/55 text-[#6c6053]' : 'border-white/50 bg-black/20 text-white/85'}`}>
-              {HERO_IMAGE_POOL.length} fotos en vivo
+              {selectedImagePool.length} fotos en vivo
             </span>
           </div>
 
