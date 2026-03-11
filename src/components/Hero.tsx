@@ -659,15 +659,6 @@ export default function Hero() {
         },
       });
 
-      tl.to(contentRef.current, {
-        scale: 0.72,
-        x: '-12vw',
-        y: '-14vh',
-        duration: 1,
-        ease: 'power2.inOut',
-      }, 0);
-
-      tl.to(actionsRef.current, { autoAlpha: 0, y: -18, duration: 0.3 }, 0);
       tl.to(scrollHintRef.current, { autoAlpha: 0, duration: 0.2 }, 0);
       tl.to(tintRef.current, { autoAlpha: 0.34, duration: 0.8 }, 0.08);
       tl.to(cardsRef.current, {
@@ -733,10 +724,10 @@ export default function Hero() {
         </div>
       ))}
 
-      <div ref={contentRef} className={`relative z-30 flex h-full items-center px-6 md:px-10 lg:px-16 ${isDesktop ? '' : 'justify-center text-center'}`}>
+      <div ref={contentRef} className={`pointer-events-auto relative z-30 flex h-full items-center px-6 md:px-10 lg:px-16 ${isDesktop ? '' : 'justify-center text-center'}`}>
         <div className={`w-full ${isDesktop ? 'max-w-[42rem] 2xl:max-w-[45rem]' : 'max-w-[36rem] text-white'}`}>
           {showLocationPrompt && (
-            <div className={`mb-4 max-w-[31rem] rounded-2xl border px-4 py-3 ${isDesktop ? 'border-[#cfbfa7] bg-white/70 text-[#51463b]' : 'border-white/50 bg-black/28 text-white/92'}`}>
+            <div className={`pointer-events-auto mb-4 max-w-[31rem] rounded-2xl border px-4 py-3 ${isDesktop ? 'border-[#cfbfa7] bg-white/70 text-[#51463b]' : 'border-white/50 bg-black/28 text-white/92'}`}>
               <p className="text-[9px] uppercase tracking-[0.35em]">
                 Activá ubicación para personalizar esta portada
               </p>
@@ -807,7 +798,7 @@ export default function Hero() {
             {heroCopy.subtitle}
           </p>
 
-          <div ref={actionsRef} className="mt-8 flex flex-wrap items-center gap-3">
+          <div ref={actionsRef} className="pointer-events-auto mt-8 flex flex-wrap items-center gap-3">
             <a
               href="#collections"
               className={`inline-flex items-center justify-center border px-8 py-3 text-[10px] uppercase tracking-[0.34em] transition-all duration-300 ${isDesktop ? 'border-[#1a1713] text-[#1a1713] hover:bg-[#1a1713] hover:text-white' : 'border-white/85 text-white hover:bg-white hover:text-[#1a1713]'}`}
