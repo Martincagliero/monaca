@@ -714,27 +714,9 @@ export default function Hero() {
 
       <div ref={contentRef} className={`pointer-events-auto relative z-30 flex h-full items-center px-6 md:px-10 lg:px-16 ${isDesktop ? '' : 'justify-center text-center'}`}>
         <div className={`w-full ${isDesktop ? 'max-w-[42rem] 2xl:max-w-[45rem]' : 'max-w-[36rem] text-white'}`}>
-          <div className="mb-5 flex flex-wrap items-center gap-3">
-            <p className={`text-[9px] uppercase tracking-[0.46em] sm:text-[10px] sm:tracking-[0.58em] ${isDesktop ? 'text-[#7e7266]' : 'text-white/75'}`}>
-              {heroCopy.kicker}
-            </p>
-            {!locating && city && (
-              <span className={`inline-flex max-w-[13.5rem] items-center gap-2 truncate rounded-full border px-3 py-1 text-[8px] uppercase tracking-[0.3em] ${isDesktop ? 'border-[#cbbba5] bg-white/55 text-[#6c6053]' : 'border-white/50 bg-black/20 text-white/85'}`}>
-                {city}
-              </span>
-            )}
-            {typeof temperature === 'number' && (
-              <span className={`rounded-full border px-3 py-1 text-[8px] uppercase tracking-[0.3em] ${isDesktop ? 'border-[#cbbba5] bg-white/55 text-[#6c6053]' : 'border-white/50 bg-black/20 text-white/85'}`}>
-                {Math.round(temperature)}C
-              </span>
-            )}
-            <span className={`rounded-full border px-3 py-1 text-[8px] uppercase tracking-[0.3em] ${isDesktop ? 'border-[#cbbba5] bg-white/55 text-[#6c6053]' : 'border-white/50 bg-black/20 text-white/85'}`}>
-              {editionId}
-            </span>
-            <span className={`rounded-full border px-3 py-1 text-[8px] uppercase tracking-[0.3em] ${isDesktop ? 'border-[#cbbba5] bg-white/55 text-[#6c6053]' : 'border-white/50 bg-black/20 text-white/85'}`}>
-              {selectedImagePool.length} fotos en vivo
-            </span>
-          </div>
+          <p className={`mb-5 text-[9px] uppercase tracking-[0.46em] sm:text-[10px] sm:tracking-[0.58em] ${isDesktop ? 'text-[#7e7266]' : 'text-white/75'}`}>
+            {heroCopy.kicker}
+          </p>
 
           <h1
             ref={titleRef}
@@ -784,8 +766,10 @@ export default function Hero() {
               <p className={`mt-2 text-sm ${isDesktop ? 'text-[#1a1713]' : 'text-white'}`}>{city}</p>
             </div>
             <div className={`rounded-2xl border px-4 py-3 ${isDesktop ? 'border-[#d9ccb9] bg-white/55' : 'border-white/35 bg-black/20'}`}>
-              <p className={`text-[8px] uppercase tracking-[0.34em] ${isDesktop ? 'text-[#867a6e]' : 'text-white/75'}`}>Edición</p>
-              <p className={`mt-2 text-sm ${isDesktop ? 'text-[#1a1713]' : 'text-white'}`}>{editionId}</p>
+              <p className={`text-[8px] uppercase tracking-[0.34em] ${isDesktop ? 'text-[#867a6e]' : 'text-white/75'}`}>Temperatura</p>
+              <p className={`mt-2 text-sm ${isDesktop ? 'text-[#1a1713]' : 'text-white'}`}>
+                {typeof temperature === 'number' ? `${Math.round(temperature)}°C` : '--'}
+              </p>
             </div>
             <div className={`rounded-2xl border px-4 py-3 ${isDesktop ? 'border-[#d9ccb9] bg-white/55' : 'border-white/35 bg-black/20'}`}>
               <p className={`text-[8px] uppercase tracking-[0.34em] ${isDesktop ? 'text-[#867a6e]' : 'text-white/75'}`}>Clima</p>
