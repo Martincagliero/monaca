@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowUpRight, ChevronDown, LocateFixed } from 'lucide-react';
+import { ArrowUpRight, ChevronDown } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -495,10 +495,6 @@ export default function Hero() {
     );
   }, [locating]);
 
-  useEffect(() => {
-    requestUserLocation();
-  }, [requestUserLocation]);
-
   const heroCopy = useMemo(
     () => buildHeroCopy({ city, tempBucket }),
     [city, tempBucket],
@@ -722,10 +718,11 @@ export default function Hero() {
             <p className={`text-[9px] uppercase tracking-[0.46em] sm:text-[10px] sm:tracking-[0.58em] ${isDesktop ? 'text-[#7e7266]' : 'text-white/75'}`}>
               {heroCopy.kicker}
             </p>
-            <span className={`inline-flex max-w-[13.5rem] items-center gap-2 truncate rounded-full border px-3 py-1 text-[8px] uppercase tracking-[0.3em] ${isDesktop ? 'border-[#cbbba5] bg-white/55 text-[#6c6053]' : 'border-white/50 bg-black/20 text-white/85'}`}>
-              <LocateFixed size={10} />
-              {locating ? 'Detectando...' : city}
-            </span>
+            {!locating && city && (
+              <span className={`inline-flex max-w-[13.5rem] items-center gap-2 truncate rounded-full border px-3 py-1 text-[8px] uppercase tracking-[0.3em] ${isDesktop ? 'border-[#cbbba5] bg-white/55 text-[#6c6053]' : 'border-white/50 bg-black/20 text-white/85'}`}>
+                {city}
+              </span>
+            )}
             {typeof temperature === 'number' && (
               <span className={`rounded-full border px-3 py-1 text-[8px] uppercase tracking-[0.3em] ${isDesktop ? 'border-[#cbbba5] bg-white/55 text-[#6c6053]' : 'border-white/50 bg-black/20 text-white/85'}`}>
                 {Math.round(temperature)}C
@@ -777,7 +774,7 @@ export default function Hero() {
               disabled={locating}
               className={`inline-flex items-center justify-center rounded-full border px-5 py-3 text-[9px] uppercase tracking-[0.28em] transition-all duration-300 ${isDesktop ? 'border-[#c7b79f] bg-white/70 text-[#5f5346] hover:bg-[#f3eadf]' : 'border-white/55 bg-black/20 text-white/90 hover:bg-white/15'}`}
             >
-              {locating ? 'Detectando ubicación...' : 'Actualizar ubicación y clima'}
+              {locating ? 'Detectando ubicación...' : 'Detectar ubicación y clima'}
             </button>
           </div>
 
