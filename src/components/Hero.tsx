@@ -443,8 +443,11 @@ export default function Hero() {
   }, []);
 
   const requestUserLocation = useCallback(() => {
+    if (locating) return;
+
     if (!navigator.geolocation) {
       setLocationError('Tu navegador no permite geolocalización.');
+      setShowLocationPrompt(true);
       return;
     }
 
@@ -476,6 +479,9 @@ export default function Hero() {
               setTempBucket(classifyTemp(currentTemp));
             }
           }
+
+          // Regenerates edition to refresh visible recommendations after location updates.
+          setRefreshSeed(Date.now());
         } catch {
           setLocationError('No pudimos actualizar ciudad y clima en este momento.');
         } finally {
@@ -494,7 +500,7 @@ export default function Hero() {
       },
       { enableHighAccuracy: false, timeout: 7000, maximumAge: 0 },
     );
-  }, []);
+  }, [locating]);
 
   useEffect(() => {
     requestUserLocation();
@@ -527,6 +533,12 @@ export default function Hero() {
     const base = Math.abs(refreshSeed).toString(36).toUpperCase();
     return `MN-${base.slice(-4).padStart(4, '0')}`;
   }, [refreshSeed]);
+
+  const climateLabel = useMemo(() => {
+    if (tempBucket === 'cold') return 'frío';
+    if (tempBucket === 'warm') return 'cálido';
+    return 'templado';
+  }, [tempBucket]);
 
   const activeAccent = personalizedLooks.find((item) => item.id === activeLook)?.palette ?? null;
 
@@ -725,6 +737,7 @@ export default function Hero() {
               <div className="mt-3 flex flex-wrap gap-2">
                 <button
                   onClick={requestUserLocation}
+                  disabled={locating}
                   className={`rounded-full border px-4 py-2 text-[8px] uppercase tracking-[0.3em] transition-all ${isDesktop ? 'border-[#1a1713] text-[#1a1713] hover:bg-[#1a1713] hover:text-white' : 'border-white/80 text-white hover:bg-white hover:text-[#1a1713]'}`}
                 >
                   Permitir ubicación
@@ -733,7 +746,7 @@ export default function Hero() {
                   onClick={() => setShowLocationPrompt(false)}
                   className={`rounded-full border px-4 py-2 text-[8px] uppercase tracking-[0.3em] transition-all ${isDesktop ? 'border-[#c8b79e] text-[#6b5f52] hover:bg-[#f1e7d9]' : 'border-white/55 text-white/88 hover:bg-white/15'}`}
                 >
-                  Ahora no
+                  Continuar sin ubicación
                 </button>
               </div>
             </div>
@@ -794,16 +807,11 @@ export default function Hero() {
               Reservar asesoramiento
             </a>
             <button
-              onClick={() => setRefreshSeed(Date.now())}
-              className={`inline-flex items-center justify-center rounded-full border px-5 py-3 text-[9px] uppercase tracking-[0.28em] transition-all duration-300 ${isDesktop ? 'border-[#c7b79f] bg-white/70 text-[#5f5346] hover:bg-[#f3eadf]' : 'border-white/55 bg-black/20 text-white/90 hover:bg-white/15'}`}
-            >
-              Nuevo estilo
-            </button>
-            <button
               onClick={requestUserLocation}
+              disabled={locating}
               className={`inline-flex items-center justify-center rounded-full border px-5 py-3 text-[9px] uppercase tracking-[0.28em] transition-all duration-300 ${isDesktop ? 'border-[#c7b79f] bg-white/70 text-[#5f5346] hover:bg-[#f3eadf]' : 'border-white/55 bg-black/20 text-white/90 hover:bg-white/15'}`}
             >
-              Actualizar ubicación
+              {locating ? 'Detectando ubicación...' : 'Actualizar ubicación y clima'}
             </button>
           </div>
 
@@ -818,9 +826,7 @@ export default function Hero() {
             </div>
             <div className={`rounded-2xl border px-4 py-3 ${isDesktop ? 'border-[#d9ccb9] bg-white/55' : 'border-white/35 bg-black/20'}`}>
               <p className={`text-[8px] uppercase tracking-[0.34em] ${isDesktop ? 'text-[#867a6e]' : 'text-white/75'}`}>Clima</p>
-              <p className={`mt-2 text-sm capitalize ${isDesktop ? 'text-[#1a1713]' : 'text-white'}`}>
-                {tempBucket === 'cold' ? 'frío' : tempBucket === 'warm' ? 'cálido' : 'templado'}
-              </p>
+              <p className={`mt-2 text-sm capitalize ${isDesktop ? 'text-[#1a1713]' : 'text-white'}`}>{climateLabel}</p>
             </div>
           </div>
         </div>
