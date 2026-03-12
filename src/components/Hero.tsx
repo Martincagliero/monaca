@@ -80,12 +80,8 @@ const LOOKBOOK: HeroLook[] = [
   },
 ];
 
-const HERO_IMAGES = Array.from({ length: 6 }, (_, i) => `/monaca/hero/look-${String(i + 1).padStart(2, '0')}.jpg`);
 const ROPA_IMAGES = Array.from({ length: 28 }, (_, i) => `/monaca/ropa/ropa-${String(i + 1).padStart(2, '0')}.jpg`);
 const CALOR_IMAGES = Array.from({ length: 4 }, (_, i) => `/monaca/hero/calor-${i + 1}.jpg`);
-const COLD_IMAGES = [...HERO_IMAGES, ...ROPA_IMAGES.slice(0, 10)];
-const MILD_IMAGES = [...HERO_IMAGES, ...ROPA_IMAGES.slice(10, 20)];
-const WARM_IMAGES = [...CALOR_IMAGES, ...ROPA_IMAGES.slice(20, 28)];
 
 function classifyTemp(value: number | null): TempBucket {
   if (value === null) return 'mild';
@@ -163,49 +159,97 @@ export default function Hero() {
   const [temperature, setTemperature] = useState<number | null>(null);
   const [tempBucket, setTempBucket] = useState<TempBucket>('mild');
   const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const [refreshSeed, setRefreshSeed] = useState(() => Date.now());
   const [activeIndex, setActiveIndex] = useState(0);
 
+  const resolveLocationData = useCallback(async (lat: number, lon: number) => {
+    const [geoRes, weatherRes] = await Promise.all([
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`, { cache: 'no-store' }),
+      fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m&current_weather=true`,
+        { cache: 'no-store' },
+      ),
+    ]);
+
+    if (geoRes.ok) {
+      const geo = await geoRes.json();
+      const cityName = geo?.address?.city || geo?.address?.town || geo?.address?.village || geo?.address?.state;
+      if (cityName) setCity(String(cityName));
+    }
+
+    if (weatherRes.ok) {
+      const weather = await weatherRes.json();
+      const currentTemp = weather?.current?.temperature_2m ?? weather?.current_weather?.temperature;
+      if (typeof currentTemp === 'number') {
+        setTemperature(currentTemp);
+        setTempBucket(classifyTemp(currentTemp));
+      }
+    }
+
+    setRefreshSeed(Date.now());
+  }, []);
+
+  const getLocationErrorMessage = useCallback((error?: GeolocationPositionError | null) => {
+    if (!error) return 'No pudimos detectar tu ubicacion en este momento.';
+    if (error.code === 1) return 'Permiso de ubicacion bloqueado. Habilitalo en el navegador del celular.';
+    if (error.code === 2) return 'No pudimos obtener tu posicion. Verifica GPS o conexion.';
+    if (error.code === 3) return 'La geolocalizacion tardo demasiado. Probá de nuevo.';
+    return 'No pudimos detectar tu ubicacion en este momento.';
+  }, []);
+
   const requestUserLocation = useCallback(() => {
-    if (locating || !navigator.geolocation) return;
+    if (locating) return;
+
+    if (!navigator.geolocation) {
+      setLocationError('Este dispositivo no soporta geolocalizacion.');
+      return;
+    }
+
+    const host = window.location.hostname;
+    const isLocalhost = host === 'localhost' || host === '127.0.0.1';
+    if (!window.isSecureContext && !isLocalhost) {
+      setLocationError('La geolocalizacion en celular requiere HTTPS.');
+      return;
+    }
+
+    setLocationError(null);
 
     setLocating(true);
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
+    const getCurrentPosition = (options: PositionOptions) =>
+      new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, options);
+      });
+
+    void (async () => {
+      try {
+        if ('permissions' in navigator && navigator.permissions?.query) {
+          const permission = await navigator.permissions.query({ name: 'geolocation' });
+          if (permission.state === 'denied') {
+            setLocationError('Permiso de ubicacion bloqueado. Habilitalo en el navegador del celular.');
+            return;
+          }
+        }
+
+        let position: GeolocationPosition;
+        try {
+          position = await getCurrentPosition({ enableHighAccuracy: true, timeout: 15000, maximumAge: 60_000 });
+        } catch {
+          // Fallback for mobile browsers that fail high-accuracy lookups.
+          position = await getCurrentPosition({ enableHighAccuracy: false, timeout: 20000, maximumAge: 300_000 });
+        }
+
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
-
-        try {
-          const [geoRes, weatherRes] = await Promise.all([
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`),
-            fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m&current_weather=true`),
-          ]);
-
-          if (geoRes.ok) {
-            const geo = await geoRes.json();
-            const cityName = geo?.address?.city || geo?.address?.town || geo?.address?.village || geo?.address?.state;
-            if (cityName) setCity(String(cityName));
-          }
-
-          if (weatherRes.ok) {
-            const weather = await weatherRes.json();
-            const currentTemp = weather?.current?.temperature_2m ?? weather?.current_weather?.temperature;
-            if (typeof currentTemp === 'number') {
-              setTemperature(currentTemp);
-              setTempBucket(classifyTemp(currentTemp));
-            }
-          }
-
-          setRefreshSeed(Date.now());
-        } finally {
-          setLocating(false);
-        }
-      },
-      () => setLocating(false),
-      { enableHighAccuracy: false, timeout: 7000, maximumAge: 0 },
-    );
-  }, [locating]);
+        await resolveLocationData(lat, lon);
+      } catch (error) {
+        setLocationError(getLocationErrorMessage(error as GeolocationPositionError));
+      } finally {
+        setLocating(false);
+      }
+    })();
+  }, [getLocationErrorMessage, locating, resolveLocationData]);
 
   const heroCopy = useMemo(() => buildHeroCopy(city, tempBucket), [city, tempBucket]);
 
@@ -254,52 +298,58 @@ export default function Hero() {
   const climateLabel = tempBucket === 'cold' ? 'frio' : tempBucket === 'warm' ? 'calido' : 'templado';
 
   return (
-    <section id="hero" className="relative min-h-[100svh] overflow-hidden bg-[#f7f2e8] px-6 pb-14 pt-28 md:px-10 lg:px-14 lg:pt-32">
+    <section id="hero" className="relative min-h-[100svh] overflow-hidden bg-[#f7f2e8] px-4 pb-12 pt-24 sm:px-6 sm:pb-14 sm:pt-28 md:px-10 lg:px-14 lg:pt-32">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(218,197,164,0.42),transparent_38%),radial-gradient(circle_at_86%_14%,rgba(77,57,35,0.18),transparent_42%),linear-gradient(160deg,#f8f2e8_0%,#efe3d1_48%,#f5efe5_100%)]" />
       <div className="hero-grid pointer-events-none absolute inset-0 opacity-[0.14]" />
 
-      <div className="relative z-10 mx-auto grid w-full max-w-7xl gap-10 lg:grid-cols-12 lg:items-center">
+      <div className="relative z-10 mx-auto grid w-full max-w-7xl gap-8 md:gap-10 lg:grid-cols-12 lg:items-center">
         <div className="lg:col-span-7">
-          <p className="inline-flex rounded-full border border-[#cbb89a] bg-white/55 px-4 py-2 text-[10px] uppercase tracking-[0.3em] text-[#6b5e50] backdrop-blur-sm">
+          <p className="inline-flex rounded-full border border-[#cbb89a] bg-white/55 px-3.5 py-2 text-[9px] uppercase tracking-[0.2em] sm:text-[10px] sm:tracking-[0.3em] text-[#6b5e50] backdrop-blur-sm">
             {heroCopy.kicker}
           </p>
 
           <h1
-            className="mt-6 text-[clamp(2.4rem,7.8vw,6.6rem)] font-light uppercase leading-[0.86] tracking-[0.08em] text-[#1d1914]"
+            className="mt-5 text-[clamp(2rem,10.5vw,6.6rem)] font-light uppercase leading-[0.88] tracking-[0.05em] sm:tracking-[0.08em] text-[#1d1914]"
             style={{ fontFamily: 'var(--font-cormorant)' }}
           >
             {heroCopy.titleA}
             <span className="block text-[#4f4338]">{heroCopy.titleB}</span>
           </h1>
 
-          <p className="mt-7 max-w-2xl text-[11px] uppercase leading-relaxed tracking-[0.24em] text-[#706456] md:text-xs md:tracking-[0.3em]">
+          <p className="mt-5 max-w-2xl text-[10px] uppercase leading-relaxed tracking-[0.18em] text-[#706456] sm:text-[11px] sm:tracking-[0.24em] md:text-xs md:tracking-[0.3em]">
             {heroCopy.subtitle}
           </p>
 
-          <div className="mt-8 flex flex-wrap items-center gap-3">
+          <div className="mt-7 flex flex-col items-stretch gap-2.5 sm:mt-8 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
             <a
               href="#collections"
-              className="inline-flex items-center justify-center border border-[#1b1712] px-8 py-3 text-[10px] uppercase tracking-[0.32em] text-[#1b1712] transition-all duration-300 hover:bg-[#1b1712] hover:text-white"
+              className="inline-flex w-full items-center justify-center border border-[#1b1712] px-6 py-3 text-[10px] uppercase tracking-[0.26em] sm:w-auto sm:px-8 sm:tracking-[0.32em] text-[#1b1712] transition-all duration-300 hover:bg-[#1b1712] hover:text-white"
             >
               Ver coleccion
             </a>
             <a
               href="#contact"
-              className="inline-flex items-center justify-center border border-[#baa486] px-8 py-3 text-[10px] uppercase tracking-[0.32em] text-[#5d5042] transition-all duration-300 hover:bg-[#efdfcc]"
+              className="inline-flex w-full items-center justify-center border border-[#baa486] px-6 py-3 text-[10px] uppercase tracking-[0.24em] sm:w-auto sm:px-8 sm:tracking-[0.32em] text-[#5d5042] transition-all duration-300 hover:bg-[#efdfcc]"
             >
               Reservar asesoramiento
             </a>
             <button
               onClick={requestUserLocation}
               disabled={locating}
-              className="inline-flex items-center gap-2 rounded-full border border-[#c7b59a] bg-white/65 px-6 py-3 text-[10px] uppercase tracking-[0.3em] text-[#5f5346] transition-all duration-300 hover:bg-[#f3e7d7] disabled:cursor-not-allowed disabled:opacity-70"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#c7b59a] bg-white/65 px-5 py-3 text-[10px] uppercase tracking-[0.2em] sm:w-auto sm:px-6 sm:tracking-[0.3em] text-[#5f5346] transition-all duration-300 hover:bg-[#f3e7d7] disabled:cursor-not-allowed disabled:opacity-70"
             >
               <RefreshCw size={14} className={locating ? 'animate-spin' : ''} />
-              {locating ? 'Detectando...' : 'Detectar ubicacion y clima'}
+              {locating ? 'Detectando...' : <span><span className="sm:hidden">Detectar clima</span><span className="hidden sm:inline">Detectar ubicacion y clima</span></span>}
             </button>
           </div>
 
-          <div className="mt-8 grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-3">
+          {locationError ? (
+            <p className="mt-3 text-[10px] uppercase tracking-[0.16em] text-[#7a4c3e] sm:text-[11px] sm:tracking-[0.2em]">
+              {locationError}
+            </p>
+          ) : null}
+
+          <div className="mt-7 grid max-w-2xl grid-cols-1 gap-3 min-[430px]:grid-cols-2 md:grid-cols-3">
             <div className="rounded-2xl border border-[#d7c8b2] bg-white/58 px-4 py-3 backdrop-blur-sm">
               <p className="text-[8px] uppercase tracking-[0.32em] text-[#8a7e70]">Ubicacion</p>
               <p className="mt-2 flex items-center gap-2 text-sm text-[#1a1713]">
@@ -322,14 +372,14 @@ export default function Hero() {
         </div>
 
         <div className="lg:col-span-5">
-          <div className="rounded-[2rem] border border-[#d8c9b2] bg-white/42 p-4 shadow-[0_28px_90px_rgba(26,22,16,0.15)] backdrop-blur-md md:p-5">
+          <div className="rounded-[1.6rem] sm:rounded-[2rem] border border-[#d8c9b2] bg-white/42 p-3.5 shadow-[0_20px_60px_rgba(26,22,16,0.13)] sm:shadow-[0_28px_90px_rgba(26,22,16,0.15)] backdrop-blur-md md:p-5">
             <div className="relative aspect-[4/5] overflow-hidden rounded-[1.45rem]">
               <Image
                 src={activeLook.src}
                 alt={activeLook.name}
                 fill
                 priority
-                sizes="(max-width: 1024px) 100vw, 40vw"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 40vw"
                 className="object-cover"
               />
               <div className="absolute inset-0 bg-[linear-gradient(170deg,rgba(255,255,255,0.1),transparent_42%,rgba(26,22,16,0.45))]" />
@@ -349,7 +399,7 @@ export default function Hero() {
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-3 gap-3">
+            <div className="mt-3.5 grid grid-cols-3 gap-2.5 sm:mt-4 sm:gap-3">
               {displayLooks.slice(0, 3).map((look, index) => (
                 <button
                   key={look.id}
